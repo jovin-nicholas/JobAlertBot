@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model JobAlert {
+  id        String    @id @default(cuid())
+  frequency String    // "hourly", "daily", "weekly"
+  email     String
+  active    Boolean   @default(true)
+  companies Company[]
+  keywords  Keyword[]
+  jobs      Job[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Company {
+  id         String   @id @default(cuid())
+  name       String   // Name or URL of the company
+  jobAlertId String
+  jobAlert   JobAlert @relation(fields: [jobAlertId], references: [id], onDelete: Cascade)
+}
+
+model Keyword {
+  id         String   @id @default(cuid())
+  word       String   // Job title or keyword
+  jobAlertId String
+  jobAlert   JobAlert @relation(fields: [jobAlertId], references: [id], onDelete: Cascade)
+}
+
+model Job {
+  id          String   @id @default(cuid())
+  title       String
+  company     String
+  description String?
+  url         String
+  location    String?
+  postedAt    DateTime?
+  createdAt   DateTime @default(now())
+  notified    Boolean  @default(false)
+
+  jobAlertId  String
+  jobAlert    JobAlert @relation(fields: [jobAlertId], references: [id], onDelete: Cascade)
+}
